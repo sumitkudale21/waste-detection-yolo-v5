@@ -1,7 +1,7 @@
 import os
 import sys
 import zipfile
-import gdown
+import gdown 
 from wasteDetection.logger import logging
 from wasteDetection.exception import AppException
 from wasteDetection.entity.config_entity import DataIngestionConfig
