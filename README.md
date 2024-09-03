@@ -46,7 +46,7 @@ open up you local host and port
 
 
 
-# AWS-CICD-Deployment-with-Github-Actions
+<!-- # AWS-CICD-Deployment-with-Github-Actions
 
 ## 1. Login to AWS console.
 
@@ -143,4 +143,4 @@ docker push chickenapp.azurecr.io/chicken:latest
 1. Build the Docker image of the Source Code
 2. Push the Docker image to Container Registry
 3. Launch the Web App Server in Azure 
-4. Pull the Docker image from the container registry to Web App server and run 
+4. Pull the Docker image from the container registry to Web App server and run  -->
