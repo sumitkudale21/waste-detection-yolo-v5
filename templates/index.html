@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Waste Detection using YOLOv5</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+		integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			background-color: #f8f9fa;
+			color: #333;
+		}
+
+		header {
+			background-color: #007bff;
+			color: white;
+			padding: 20px 0;
+			margin-bottom: 20px;
+		}
+
+		header h1 {
+			font-weight: 300;
+		}
+
+		.card {
+			border-radius: 10px;
+			overflow: hidden;
+		}
+
+		.btn {
+			border-radius: 0;
+		}
+
+		.btn-primary,
+		.btn-success {
+			background-color: #1b2d6b;
+			border-color: #1b2d6b;
+		}
+
+		.btn-primary:hover,
+		.btn-success:hover {
+			background-color: #16316e;
+			border-color: #16316e;
+		}
+
+		.upload-image,
+		.res-part2 {
+			height: auto;
+			margin-bottom: 20px;
+			text-align: center;
+		}
+
+		.upload-image img,
+		.upload-image video,
+		.res-part2 img {
+			max-width: 100%;
+			border-radius: 5px;
+		}
+
+		.loader {
+			border: 8px solid #f3f3f3;
+			border-top: 8px solid #007bff;
+			border-radius: 50%;
+			width: 60px;
+			height: 60px;
+			animation: spin 2s linear infinite;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+
+		#loading {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(255, 255, 255, 0.8);
+			z-index: 9999;
+			display: none;
+		}
+	</style>
+</head>
+
+<body>
+	<header class="text-center">
+		<div class="container">
+			<h1>Waste Detection using YOLOv5</h1>
+		</div>
+	</header>
+
+	<div class="container">
+		<form class="input-group mb-4">
+			<div class="row w-100">
+				<div class="col-md-6 mb-2">
+					<button type="button" class="btn btn-primary col-12" id="uploadBtn">Upload Image</button>
+				</div>
+				<div class="col-md-6 mb-2">
+					<button id="predictBtn" type="button" class="btn btn-success col-12">Predict</button>
+				</div>
+			</div>
+
+			<input type="hidden" class="form-control" id="url" value="../predict" />
+			<input name="upload" type="file" id="fileInput" style="display: none;" />
+		</form>
+
+		<div class="row">
+			<div class="col-md-6 mb-4">
+				<div class="card upload-image p-3">
+					<video autoplay id="video" poster="https://img.freepik.com/free-vector/group-young-people-posing-photo_52683-18824.jpg?size=338&ext=jpg"></video>
+					<img src="" id="photo" style="display: none;">
+					<canvas style="display:none;" id="canvas"></canvas>
+				</div>
+			</div>
+			<div class="col-md-6 mb-4">
+				<div class="card res-part2 p-3">
+					<h5 class="card-title">Prediction Results</h5>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<img class="logo" src="https://apparel.ineuronvision.com/static/logo.png" />
+
+	<div id="loading">
+		<div class="loader"></div>
+	</div>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+		integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous">
+	</script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+		integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
+	</script>
+
+	<script>
+		var base_data = "";
+
+		function sendRequest(base64Data) {
+			if (base64Data) {
+				var url = $("#url").val();
+				$("#loading").show();
+				$.ajax({
+					url: url,
+					type: "post",
+					cache: false,
+					async: true,
+					crossDomain: true,
+					headers: {
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin': '*'
+					},
+					data: JSON.stringify({ image: base64Data }),
+					success: function (res) {
+						$(".res-part2").html("");
+						var imageData = res.image;
+						$(".res-part2").append("<img class='resp-img' src='data:image/jpeg;base64," + imageData + "' alt='Prediction Result' />");
+						$("#loading").hide();
+					},
+					error: function () {
+						alert("An error occurred. Please try again.");
+						$("#loading").hide();
+					}
+				});
+			}
+		}
+
+		$(document).ready(function () {
+			$("#loading").hide();
+
+			$('#predictBtn').click(function () {
+				sendRequest(base_data);
+			});
+
+			$('#uploadBtn').click(function () {
+				$('#fileInput').trigger('click');
+			});
+
+			$("#fileInput").change(function () {
+				if (this.files && this.files[0]) {
+					var reader = new FileReader();
+					reader.onload = function (e) {
+						var url = e.target.result;
+						var img = new Image();
+						img.crossOrigin = 'Anonymous';
+						img.onload = function () {
+							var canvas = document.createElement('CANVAS');
+							var ctx = canvas.getContext('2d');
+							canvas.height = this.height;
+							canvas.width = this.width;
+							ctx.drawImage(this, 0, 0);
+							base_data = canvas.toDataURL('image/jpeg', 1.0).replace(/^data:image.+;base64,/, '');
+							canvas = null;
+						};
+						img.src = url;
+						$('#photo').attr('src', url).show();
+						$('#video').hide();
+					}
+					reader.readAsDataURL(this.files[0]);
+				}
+			});
+		});
+	</script>
+</body>
+
+</html>
+    
